@@ -100,10 +100,15 @@ function IRC:quit()
 end
 
 function IRC:connect()
-   self.client = socket.connect(self.host, self.port)
+   self.client, err = socket.connect(self.host, self.port)
+   if self.client == nil then
+      logger:error(string.format("failed to connect: %s", err))
+      return false
+   end
    self.client:settimeout(0.5)
    self:send("NICK %s", self.nick)
    self:send("USER %s 8 * :%s", self.nick, self.nick)
+   return true
 end
 
 function IRC:tick()

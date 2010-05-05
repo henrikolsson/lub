@@ -27,7 +27,9 @@ function main()
                     config["channel"])
 
    load_addons()
-   irc:connect()
+   if not irc:connect() then
+      return
+   end
    
    while running do
       if not irc:tick() then
