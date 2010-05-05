@@ -1,0 +1,19 @@
+config = {
+   server = "irc.freenode.org",
+   port = 6667,
+   nick = "lublub",
+   channel = "#void",
+   
+   addons = {
+      nh = {
+         var = '/opt/unnethack/var',
+         dgldir = '/opt/dgamelaunch/dgldir/'
+      },
+      roles = {
+         ["god!root@example.org"] = {
+            password = "secret",
+            roles = {"admin"}
+         }
+      }
+   }
+}
