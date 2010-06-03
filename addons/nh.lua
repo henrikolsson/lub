@@ -19,7 +19,8 @@ local charmap = {
    Tou = "Tourist",
    Val = "Valkyrie",
    Wiz = "Wizard",
-
+   Vam = "Vampire",
+   
    Hum = "human",
    Orc = "orcish",
    Gno = "gnomish",
