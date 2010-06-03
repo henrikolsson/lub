@@ -310,7 +310,7 @@ function nh_get_online_players(irc, target, command)
       end
    end
    if playing == 0 then
-      irc:reply(target, "the world of unnethack is currently empty.. why don't you give it a try?")
+      irc:reply("the world of unnethack is currently empty.. why don't you give it a try?")
    end
 end
 
