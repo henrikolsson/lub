@@ -88,7 +88,7 @@ function livelog_msg(data)
    if data['achieve'] ~= nil then
       local diff_a = tonumber(data['achieve_diff'])
       -- ignore irrelevant achievements & luckstone
-      if diff_a == 0 or diff_a == 0x200 then
+      if diff_a == 0 or diff_a == 0x200 or diff_a == 0x400 then
          return
       end
       
@@ -146,6 +146,11 @@ function livelog_msg(data)
       return string.format("%s has defied the laws of unnethack, process exited with status %s",
                            data['player'],
                            data['crash'])
+   elseif data['sokobanprize'] ~= nil then
+      return string.format("%s obtained %s after %s turns in Sokoban.",
+                           data['player'], 
+                           data['sokobanprize'], 
+                           data['turns'])
    elseif data['game_action'] ~= nil then
       if data['game_action'] == 'started' then
          return string.format("%s enters the dungeon as a%s %s %s.",
