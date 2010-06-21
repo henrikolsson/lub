@@ -69,6 +69,9 @@ function nh_init(config)
    config = config
    irc.hooks_msg_command[".online"] = nh_get_online_players   
    irc.hooks_msg_command[".cur"] = nh_get_online_players   
+   irc.hooks_msg_command[".last"] = nh_get_last_dump
+   irc.hooks_msg_command[".lastgame"] = nh_get_last_dump
+   irc.hooks_msg_command[".lastdump"] = nh_get_last_dump
    xlogfile_pos = posix.stat('/opt/nethack.nu/var/unnethack/xlogfile').size
    livelog_pos = posix.stat('/opt/nethack.nu/var/unnethack/livelog').size
 end
@@ -253,6 +256,9 @@ function nh_destroy(config)
    logger:debug("nh_destroy()")
    irc.hooks_msg_command[".online"] = nil
    irc.hooks_msg_command[".cur"] = nil
+   irc.hooks_msg_command[".last"] = nil
+   irc.hooks_msg_command[".lastgame"] = nil
+   irc.hooks_msg_command[".lastdump"] = nil
 end
 
 function parse_nh(line)
@@ -263,6 +269,34 @@ function parse_nh(line)
       result[kv[1]] = kv[2]
    end
    return result
+end
+
+function nh_get_last_dump(irc, target, command, sender, line)
+   local tokens = split(line)
+   local nick = irc:parse_prefix(sender)
+   if #tokens >= 2 then
+      nick = tokens[2]
+   end
+   nick = nick:gsub("/", "")
+   nick = nick:gsub("%.", "")
+   local ext = nil
+   local stat = posix.stat(string.format("/srv/un.nethack.nu/users/%s/dumps/%s.last.txt.html", nick, nick))
+   if stat == nil then
+      stat = posix.stat(string.format("/srv/un.nethack.nu/users/%s/dumps/%s.last.txt", nick, nick))
+      if stat == nil then
+         irc:reply("No lastdump for %s", nick)
+      else
+         ext = ".txt"
+      end
+   else
+      ext = ".txt.html"
+   end
+   
+   if ext ~= nil then
+      local tg = posix.readlink(string.format("/srv/un.nethack.nu/users/%s/dumps/%s.last%s", nick, nick, ext))
+      local fn = posix.basename(tg)
+      irc:reply("http://un.nethack.nu/users/%s/dumps/%s", nick, fn)
+   end
 end
 
 function nh_get_online_players(irc, target, command)
