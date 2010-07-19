@@ -155,7 +155,15 @@ function livelog_msg(data)
                            data['sokobanprize'], 
                            data['turns'])
    elseif data['game_action'] ~= nil then
-      if data['game_action'] == 'started' then
+      if data['game_action'] == 'started' and data['character'] ~= nil then
+         return string.format("%s enters the dungeon as a%s.",
+                              data['player'],
+                              data['character'])
+      elseif data['game_action'] == 'resumed' and data['character'] ~= nil then
+         return string.format("%s the%s resumes the adventure.",
+                              data['player'],
+                              data['character'])
+      elseif data['game_action'] == 'started' then
          return string.format("%s enters the dungeon as a%s %s %s.",
                               data['player'],
                               data['alignment'],
@@ -166,10 +174,13 @@ function livelog_msg(data)
                               data['player'],
                               data['race'],
                               data['role'])
-                                 
       elseif data['game_action'] == 'saved' then
          return string.format("%s is taking a break from the hard life as an adventurer.",
                               data['player'])
+      elseif data['game_action'] == 'panicked' then
+         return string.format("The dungeon of %s collapsed after %s turns!",
+                              data['player'],
+                              data['turns'])
       end
    end
    
