@@ -64,6 +64,9 @@ local achievements = {
    'obtained the sokoban prize',
    'defeated Medusa',
 }
+
+local scum = {}
+
 function nh_init(config)
    logger:debug("nh_init()")
    config = config
@@ -88,6 +91,10 @@ function lol()
 end
 
 function livelog_msg(data)
+   if data["player"] ~= nil and scum[data["player"]] ~= nil then
+      logger:info(string.format("scum ignored: %s", data["player"]))
+      return "ignore"
+   end
    if data['achieve'] ~= nil then
       local diff_a = tonumber(data['achieve_diff'])
       -- ignore irrelevant achievements & luckstone
@@ -188,6 +195,12 @@ function livelog_msg(data)
 end
 
 function nh_tick(irc)
+   for k,v in pairs(scum) do
+      if v + 60 < os.time() then
+         logger:info(string.format("forgetting scum: %s", k))
+         scum[k] = nil
+      end
+   end
    local fn = nil   
    if posix.stat('/opt/nethack.nu/var/unnethack/xlogfile').size > xlogfile_pos then
       fn = '/opt/nethack.nu/var/unnethack/xlogfile'
@@ -241,16 +254,17 @@ function nh_tick(irc)
                   out = out .. "It's "
                end
                out = out .. string.format("score was %s.", data['points'])
-               if data["death"] == "quit" and tonumber(data["turns"]) < 10 then
-                  logger:debug("ignoring startscummer")
+               if ((data["death"] == "quit" or data["death"] == "escaped") and tonumber(data["turns"]) < 10) or scum[data["name"]] ~= nil then
+                  scum[data["name"]] = os.time()
+                  logger:info(string.format("ignoring startscummer: %s", data["name"]))
                else
                   irc:send_msg(irc.channel, out)
                end
             elseif fn == '/opt/nethack.nu/var/unnethack/livelog' then
                local msg = livelog_msg(data)
-               if msg ~= nil then
+               if msg ~= nil and msg ~= "ignore" then
                   irc:send_msg(irc.channel, msg)
-               else
+               elseif msg == nil then
                   logger:warn(string.format("unhandled livelog line: %s", line))
                end
             end
