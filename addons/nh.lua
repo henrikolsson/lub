@@ -241,7 +241,11 @@ function nh_tick(irc)
                   out = out .. "It's "
                end
                out = out .. string.format("score was %s.", data['points'])
-               irc:send_msg(irc.channel, out)
+               if data["death"] == "quit" and tonumber(data["turns"]) < 10 then
+                  logger:debug("ignoring startscummer")
+               else
+                  irc:send_msg(irc.channel, out)
+               end
             elseif fn == '/opt/nethack.nu/var/unnethack/livelog' then
                local msg = livelog_msg(data)
                if msg ~= nil then
