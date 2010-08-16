@@ -1,6 +1,7 @@
 require "posix"
 require "inotify"
 require "logging.console"
+require 'socket.http'
 
 local logger = logging.console()
 local config = {}
@@ -259,6 +260,30 @@ function nh_tick(irc)
                   logger:info(string.format("ignoring startscummer: %s", data["name"]))
                else
                   irc:send_msg(irc.channel, out)
+                  
+                  dumpurl = get_last_dump_url(data["name"])
+                  b,c = socket.http.request("http://is.gd/api.php?longurl=" .. dumpurl)
+                  if c == 200 then
+                     out = out .. " " .. b
+                  else
+                     logger:warn(string.format("URL shortening failed for: %s", dumpurl))
+                  end
+                  if string.len(out) > 140 then
+                     logger:warn(string.format("Too long to tweet: %s", out))
+                  else
+                     local ret = twitter:UpdateStatus(out)
+                     if ret ~= nil and type(ret) == "table" then
+                        if ret["errorCode"] ~= nil or ret["errorMsg"] ~= nil then
+                           logger:warn("Failed to tweet: " .. ret["errorCode"] .. ": " .. ret["errorMsg"])
+                        else
+                           if ret["id"] ~= nil then
+                              logger:debug("tweet id: "  .. tostring(ret["id"]))
+                           else
+                              logger:warn("hohum, weird twitter api reply")
+                           end
+                        end
+                     end
+                  end
                end
             elseif fn == '/opt/nethack.nu/var/unnethack/livelog' then
                local msg = livelog_msg(data)
@@ -300,12 +325,7 @@ function parse_nh(line)
    return result
 end
 
-function nh_get_last_dump(irc, target, command, sender, line)
-   local tokens = split(line)
-   local nick = irc:parse_prefix(sender)
-   if #tokens >= 2 then
-      nick = tokens[2]
-   end
+function get_last_dump_url(nick)
    nick = nick:gsub("/", "")
    nick = nick:gsub("%.", "")
    local ext = nil
@@ -313,7 +333,7 @@ function nh_get_last_dump(irc, target, command, sender, line)
    if stat == nil then
       stat = posix.stat(string.format("/srv/un.nethack.nu/users/%s/dumps/%s.last.txt", nick, nick))
       if stat == nil then
-         irc:reply("No lastdump for %s", nick)
+         return nil
       else
          ext = ".txt"
       end
@@ -324,7 +344,23 @@ function nh_get_last_dump(irc, target, command, sender, line)
    if ext ~= nil then
       local tg = posix.readlink(string.format("/srv/un.nethack.nu/users/%s/dumps/%s.last%s", nick, nick, ext))
       local fn = posix.basename(tg)
-      irc:reply("http://un.nethack.nu/users/%s/dumps/%s", nick, fn)
+      return string.format("http://un.nethack.nu/users/%s/dumps/%s", nick, fn)
+   end
+end
+
+function nh_get_last_dump(irc, target, command, sender, line)
+   local tokens = split(line)
+   local nick = irc:parse_prefix(sender)
+   if #tokens >= 2 then
+      nick = tokens[2]
+   end
+   nick = nick:gsub("/", "")
+   nick = nick:gsub("%.", "")
+   local url = get_last_dump_url(nick)
+   if url == nil then
+      irc:reply("No lastdump for %s", nick)
+   else
+      irc:reply(url)
    end
 end
 

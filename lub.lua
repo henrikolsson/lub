@@ -26,6 +26,13 @@ function main()
                     config["nick"],
                     config["channel"])
 
+   local twittermodule = require("twitter")
+   -- creating client instance
+   twitter = twittermodule.Client( "demogorgonbot", "unnethackbotspammer" )
+   -- verifying given credentials
+   -- TODO verify ret
+   ret = twitter:VerifyCredentials()
+
    load_addons()
    if not irc:connect() then
       return
