@@ -260,11 +260,19 @@ function nh_tick(irc)
                   logger:info(string.format("ignoring startscummer: %s", data["name"]))
                else
                   irc:send_msg(irc.channel, out)
+
+
                   
+                  -- make the twitter message more terse
+                  -- 1234567890 (Rol Rac Gen Ali), 1222333 points, 1222333 turns, death678901234567890123456789012345678901234567890123456789, http://is.gd/12345
+                  out = string.format("%s (%s %s %s %s), %s points, %s turns, %s",
+                                      data["name"], data["role"], data["race"], data["gender"], data["align"],
+                                      data['points'], data['turns'], data['death'])
+                  out = string.sub(out, 0, 120);
                   dumpurl = get_last_dump_url(data["name"])
                   b,c = socket.http.request("http://is.gd/api.php?longurl=" .. dumpurl)
                   if c == 200 then
-                     out = out .. " " .. b
+                     out = out .. ", " .. b
                   else
                      logger:warn(string.format("URL shortening failed for: %s", dumpurl))
                   end
