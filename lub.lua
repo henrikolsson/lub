@@ -28,7 +28,7 @@ function main()
 
    local twittermodule = require("twitter")
    -- creating client instance
-   twitter = twittermodule.Client( "demogorgonbot", "unnethackbotspammer" )
+   twitter = twittermodule.Client(config["twitter_username"], config["twitter_password"])
    -- verifying given credentials
    -- TODO verify ret
    ret = twitter:VerifyCredentials()
