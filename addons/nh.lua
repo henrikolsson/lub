@@ -282,7 +282,7 @@ function nh_tick(irc)
                      local ret = twitter:UpdateStatus(out)
                      if ret ~= nil and type(ret) == "table" then
                         if ret["errorCode"] ~= nil or ret["errorMsg"] ~= nil then
-                           logger:warn("Failed to tweet: " .. ret["errorCode"] .. ": " .. ret["errorMsg"])
+                           logger:warn("Failed to tweet: " .. tostring(ret["errorCode"]) .. ": " .. tostring(ret["errorMsg"]))
                         else
                            if ret["id"] ~= nil then
                               logger:debug("tweet id: "  .. tostring(ret["id"]))
