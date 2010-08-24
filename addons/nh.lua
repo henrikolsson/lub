@@ -269,7 +269,7 @@ function nh_tick(irc)
                                       data["name"], data["role"], data["race"], data["gender"], data["align"],
                                       data['points'], data['turns'], data['death'])
                   out = string.sub(out, 0, 120);
-                  dumpurl = get_last_dump_url(data["name"])
+                  dumpurl = string.format("http://un.nethack.nu/users/%s/dumps/%s.%s.txt.html", data["name"], data["name"], data["endtime"])
                   b,c = socket.http.request("http://is.gd/api.php?longurl=" .. dumpurl)
                   if c == 200 then
                      out = out .. ", " .. b
