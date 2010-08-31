@@ -279,18 +279,7 @@ function nh_tick(irc)
                   if string.len(out) > 140 then
                      logger:warn(string.format("Too long to tweet: %s", out))
                   else
-                     local ret = twitter:UpdateStatus(out)
-                     if ret ~= nil and type(ret) == "table" then
-                        if ret["errorCode"] ~= nil or ret["errorMsg"] ~= nil then
-                           logger:warn("Failed to tweet: " .. tostring(ret["errorCode"]) .. ": " .. tostring(ret["errorMsg"]))
-                        else
-                           if ret["id"] ~= nil then
-                              logger:debug("tweet id: "  .. tostring(ret["id"]))
-                           else
-                              logger:warn("hohum, weird twitter api reply")
-                           end
-                        end
-                     end
+                     os.execute("/usr/bin/tweet '" .. out .. "'")
                   end
                end
             elseif fn == '/opt/nethack.nu/var/unnethack/livelog' then
