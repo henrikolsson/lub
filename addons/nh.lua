@@ -1,5 +1,5 @@
 require "posix"
-require "inotify"
+-- require "inotify"
 require "logging.console"
 require 'socket.http'
 
