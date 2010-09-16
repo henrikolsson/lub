@@ -279,7 +279,8 @@ function nh_tick(irc)
                   if string.len(out) > 140 then
                      logger:warn(string.format("Too long to tweet: %s", out))
                   else
-                     os.execute("/usr/bin/tweet '" .. out .. "'")
+                     out = out:gsub("\"", "\\\"")
+                     os.execute("/usr/bin/tweet \"" .. out .. "\"")
                   end
                end
             elseif fn == '/opt/nethack.nu/var/unnethack/livelog' then
